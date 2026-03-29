@@ -22,7 +22,7 @@ use crate::cache::CacheManager;
 use crate::database::Database;
 use crate::error::{ApiError, ApiResult};
 use crate::models::{AnchorDetailResponse, CreateAnchorRequest};
-use crate::rpc::circuit_breaker::{CircuitBreaker, CircuitBreakerConfig};
+use crate::rpc::circuit_breaker::{rpc_circuit_breaker, CircuitBreaker, CircuitBreakerConfig};
 use crate::rpc::error::{with_retry, RetryConfig, RpcError};
 use crate::rpc::StellarRpcClient;
 use crate::services::price_feed::PriceFeedClient;
