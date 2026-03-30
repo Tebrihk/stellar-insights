@@ -9,6 +9,58 @@ const analyzer = withBundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
 });
 
+const withPWA = require('next-pwa')({
+  dest: 'public',
+  register: true,
+  skipWaiting: true,
+  disable: process.env.NODE_ENV === 'development',
+  runtimeCaching: [
+    {
+      urlPattern: /^https?.*/,
+      handler: 'NetworkFirst',
+      options: {
+        cacheName: 'offlineCache',
+        expiration: {
+          maxEntries: 200,
+        },
+      },
+    },
+    {
+      urlPattern: /\.(?:png|jpg|jpeg|svg|webp|ico|gif|avif|woff2?|ttf|eot)$/i,
+      handler: 'CacheFirst',
+      options: {
+        cacheName: 'images-fonts',
+        expiration: {
+          maxEntries: 150,
+          maxAgeSeconds: 365 * 24 * 60 * 60, // 1 year for static assets
+        },
+      },
+    },
+
+    {
+      urlPattern: /\.(?:js|mjs|css|html)$/,
+      handler: 'StaleWhileRevalidate',
+      options: {
+        cacheName: 'static-resources',
+      },
+    },
+    {
+      // Cache critical home page and static assets
+      urlPattern: /^\/(index\.html)?(?:$|\/)/,
+      handler: 'CacheFirst',
+      options: {
+        cacheName: 'pages',
+        expiration: {
+          maxEntries: 10,
+          maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
+        },
+      },
+    },
+  ],
+  // Ensure SW updates don't interfere
+  swSrc: 'public/sw.js',
+});
+
 const nextConfig: NextConfig = {
   experimental: {
     // Optimise package imports to avoid pulling in entire icon/chart libraries
@@ -17,10 +69,13 @@ const nextConfig: NextConfig = {
       "recharts",
       "framer-motion",
       "@stellar/stellar-sdk",
-  turbopack: {
-    root: '../',
+    ],
+    turbopack: {
+      root: '../',
+    },
   },
   images: {
+
     // Modern image formats for better compression
     formats: ['image/webp', 'image/avif'],
 
